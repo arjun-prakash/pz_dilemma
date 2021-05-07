@@ -9,7 +9,7 @@ from pettingzoo.utils import wrappers
 
 #from .board import Board
 
-NONE = [0,0,0]
+NONE = [0,0,0,0,0]
 NUM_ITERS = 100
 
 def env():
@@ -24,20 +24,24 @@ def env():
 class raw_env(AECEnv):
     metadata = {'render.modes': ['human'], "name": "blotto_v0"}
 
-    def __init__(self, size=3, num_resources=100):
+    def __init__(self, size=5, num_resources=100):
         super().__init__()
         self.size = size
         self.board = self.squares = [0] * size
+        self.num_resources = num_resources
+
 
         self.agents = ["player_1", "player_2"]
         self.possible_agents = self.agents[:]
         self.agent_name_mapping = dict(zip(self.agents, list(range(self.num_agents))))
 
 
-        self.action_spaces = {i:  spaces.Box(low=0, high=num_resources, shape=(self.size,1), dtype=np.int8) for i in self.agents}
-        self.observation_spaces = {i: spaces.Dict({
-                                        'observation': spaces.Box(low=0, high=num_resources, shape=(self.size,1), dtype=np.int8),
-                                  }) for i in self.agents}
+        #self.action_spaces = {i:  spaces.Box(low= np.zeros((self.size,)), high= np.ones((self.size,))*self.num_resources, shape=(self.size,), dtype=np.int8) for i in self.agents}
+        #self.observation_spaces = {i:  spaces.Box(low= np.zeros((self.size,)), high= np.ones((self.size,))*self.num_resources, shape=(self.size,), dtype=np.int8) for i in self.agents}
+
+        self.action_spaces = {i:  spaces.MultiDiscrete([self.num_resources for x in range(self.size)]) for i in self.agents}
+        self.observation_spaces = {i:  spaces.MultiDiscrete([self.num_resources for x in range(self.size)]) for i in self.agents}
+
 
         self.rewards = {i: 0 for i in self.agents}
         self.dones = {i: False for i in self.agents}
@@ -104,15 +108,23 @@ class raw_env(AECEnv):
                     win_counter.append(0)
                 else:
                     win_counter.append(1)
-            winner = stats.mode(win_counter)
+
+            m, _ = stats.mode(win_counter)
+            winner = m[0]
 
             if winner == 0:
-                self.rewards[self.agents[0]] = 100
-                self.rewards[self.agents[1]] = -100
+                self.rewards[self.agents[0]] = 1
+                self.rewards[self.agents[1]] = -1
 
             else:
-                self.rewards[self.agents[0]] = -100
-                self.rewards[self.agents[1]] = 100
+                self.rewards[self.agents[0]] = -1
+                self.rewards[self.agents[1]] = 1
+
+            #illegal states
+            if sum(self.state[self.agents[0]]) > self.num_resources: self.rewards[self.agents[0]] = -10
+            if sum(self.state[self.agents[1]]) > self.num_resources: self.rewards[self.agents[1]] = -10
+
+
 
             self.num_moves += 1
             self.dones = {agent: self.num_moves >= NUM_ITERS for agent in self.agents}
@@ -148,6 +160,8 @@ class raw_env(AECEnv):
             game_state_string = ("Current state: Agent1: {} , Agent2: {}".format(np.array(self.state[self.agents[0]]).flatten(), np.array(self.state[self.agents[1]]).flatten()))
             print(game_state_string)
             print('winner is: ', np.argmax([self.rewards[self.agents[0]], self.rewards[self.agents[1]]]))
+            #print('wins ', stats.mode(self.win_counter))
+
             return
         except:
             'error'
