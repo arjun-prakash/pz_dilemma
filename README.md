@@ -44,3 +44,14 @@ for agent in env.agent_iter():
     env.step(act)
     env.render()
 ```
+
+Test environment
+```
+from pettingzoo.test import parallel_api_test
+from src.environments import simple_pd_v0
+
+env = simple_pd_v0.env()
+env = to_parallel(env)
+
+parallel_api_test(env, num_cycles=10)
+```
