@@ -9,7 +9,7 @@ from pettingzoo.utils import wrappers
 
 #from .board import Board
 
-NONE = [0,0,0,0,0]
+NONE = [0,0,0,0,0,0,0,0,0,0]
 NUM_ITERS = 100
 
 def env():
@@ -24,11 +24,15 @@ def env():
 class raw_env(AECEnv):
     metadata = {'render.modes': ['human'], "name": "blotto_v0"}
 
-    def __init__(self, size=5, num_resources=100):
+    def __init__(self, size=10, p1_resources=100, p2_resources=80):
         super().__init__()
         self.size = size
         self.board = self.squares = [0] * size
-        self.num_resources = num_resources
+        self.p1_resources = p1_resources
+        self.p2_resources = p2_resources
+
+
+
 
 
         self.agents = ["player_1", "player_2"]
@@ -39,8 +43,8 @@ class raw_env(AECEnv):
         #self.action_spaces = {i:  spaces.Box(low= np.zeros((self.size,)), high= np.ones((self.size,))*self.num_resources, shape=(self.size,), dtype=np.int8) for i in self.agents}
         #self.observation_spaces = {i:  spaces.Box(low= np.zeros((self.size,)), high= np.ones((self.size,))*self.num_resources, shape=(self.size,), dtype=np.int8) for i in self.agents}
 
-        self.action_spaces = {i:  spaces.MultiDiscrete([self.num_resources for x in range(self.size)]) for i in self.agents}
-        self.observation_spaces = {i:  spaces.MultiDiscrete([self.num_resources for x in range(self.size)]) for i in self.agents}
+        self.action_spaces = {i:  spaces.MultiDiscrete([self.p1_resources for x in range(self.size)]) for i in self.agents}
+        self.observation_spaces = {i:  spaces.MultiDiscrete([self.p1_resources for x in range(self.size)]) for i in self.agents}
 
 
         self.rewards = {i: 0 for i in self.agents}
@@ -121,8 +125,8 @@ class raw_env(AECEnv):
                 self.rewards[self.agents[1]] = 1
 
             #illegal states
-            if sum(self.state[self.agents[0]]) > self.num_resources: self.rewards[self.agents[0]] = -10
-            if sum(self.state[self.agents[1]]) > self.num_resources: self.rewards[self.agents[1]] = -10
+            if sum(self.state[self.agents[0]]) > self.p1_resources: self.rewards[self.agents[0]] = -10
+            if sum(self.state[self.agents[1]]) > self.p2_resources: self.rewards[self.agents[1]] = -10
 
 
 

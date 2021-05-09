@@ -14,7 +14,7 @@ NUM_ITERS = 100
 def env():
     env = raw_env()
     env = wrappers.CaptureStdoutWrapper(env)
-    env = wrappers.AssertOutOfBoundsWrapper(env)
+    #env = wrappers.AssertOutOfBoundsWrapper(env)
     env = wrappers.OrderEnforcingWrapper(env)
     return env
 
@@ -48,9 +48,13 @@ class raw_env(AECEnv):
         self.num_moves = 0
 
     def render(self, mode="human"):
-        string = ("Current state: Agent1: {} , Agent2: {}".format(MOVES[self.state[self.agents[0]]], MOVES[self.state[self.agents[1]]]))
-        print(string)
-        return string
+        try:
+            #print('dones', self.dones)
+            string = ("Current state: Agent1: {} , Agent2: {}".format(MOVES[self.state[self.agents[0]]], MOVES[self.state[self.agents[1]]]))
+            print(string)
+            return sef.dones
+        except:
+            'error'
 
     def observe(self, agent):
         # observation of one agent is the previous state of the other
@@ -70,12 +74,23 @@ class raw_env(AECEnv):
         self.state[self.agent_selection] = action
 
         # collect reward if it is the last agent to act
+
+
+
+        r = 3 #reward
+        p = 1 #punishment
+        t = 5 #temptation
+        s = 0 #suckers payoff
+
+        #t > r > p > s
+        #2r > t + s
+
         if self._agent_selector.is_last():
             self.rewards[self.agents[0]], self.rewards[self.agents[1]] = {
-                (COOPERATE, COOPERATE): (-1, -1),
-                (COOPERATE, DEFECT): (-20, 0),
-                (DEFECT, COOPERATE): (0, -20),
-                (DEFECT, DEFECT): (-10, -10)
+                (COOPERATE, COOPERATE): (r, r),
+                (COOPERATE, DEFECT): (s, t),
+                (DEFECT, COOPERATE): (t, s),
+                (DEFECT, DEFECT): (p, p)
 
             }[(self.state[self.agents[0]], self.state[self.agents[1]])]
 
