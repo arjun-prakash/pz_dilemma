@@ -3,7 +3,7 @@ pz_dilemma
 
 Game Theory extension for [petting zoo](pettingzoo.ml)
 
-#Prisoners Dilemma Example
+# Prisoners Dilemma Example
 
 Import
 ```
