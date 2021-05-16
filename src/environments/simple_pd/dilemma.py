@@ -63,7 +63,11 @@ class raw_env(AECEnv):
 
     def observe(self, agent):
         # observation of one agent is the previous state of the other
+        #print('agent ', agent)
+        #print('observation' , np.array(self.observations[agent]))
         return np.array(self.observations[agent])
+
+
 
     def close(self):
         pass

@@ -7,7 +7,7 @@ Game Theory extension for [petting zoo](pettingzoo.ml)
 
 Import
 ```
-from src.environments import simple_pd_v0
+from src.environments import dilemma_v0
 import supersuit as ss
 from stable_baselines3 import A2C
 from pettingzoo.utils.conversions import to_parallel
@@ -15,8 +15,7 @@ from pettingzoo.utils.conversions import to_parallel
 
 Set up environment
 ```
-env = simple_pd_v0.env()
-env = ss.agent_indicator_v0(env)
+env = dilemma_v0.env('pd')
 env = to_parallel(env)
 env = ss.pettingzoo_env_to_vec_env_v0(env)
 env = ss.concat_vec_envs_v0(env, 4, base_class='stable_baselines3')
@@ -35,8 +34,7 @@ model.save("policy")
 
 Run model
 ```
-env = env = simple_pd_v0.env()
-env = ss.agent_indicator_v0(env)
+env = dilemma_v0.env('pd')
 env.reset()
 for agent in env.agent_iter():
     obs, reward, done, info = env.last()
