@@ -12,6 +12,7 @@ build/
 develop-eggs/
 dist/
 downloads/
+
 eggs/
 .eggs/
 lib/
@@ -87,5 +88,3 @@ target/
 
 # Mypy cache
 .mypy_cache/
-
-notebooks/tmp/
