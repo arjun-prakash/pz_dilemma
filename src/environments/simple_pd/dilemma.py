@@ -89,7 +89,8 @@ class raw_env(AECEnv):
         #2r > t + s
 
         if self._agent_selector.is_last():
-            self.rewards[self.agents[0]], self.rewards[self.agents[1]] = self.game.get_payoff()[(self.state[self.agents[0]]['dilemma'], self.state[self.agents[1]]['dilemma'])]
+            self.rewards[self.agents[0]], self.rewards[self.agents[1]] = self.game.get_payoff()[(self.state[self.agents[0]], self.state[self.agents[1]])]
+
 
             self.num_moves += 1
             self.dones = {agent: self.num_moves >= self.game.get_num_iters() for agent in self.agents}

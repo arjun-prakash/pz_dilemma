@@ -71,7 +71,7 @@ class raw_env(AECEnv):
         # observation of one agent is the previous state of the other
         #print('agent ', agent)
         #print('observation' , np.array(self.observations[agent]))
-        #print('observations', self.observations)
+        print('observations', self.observations)
         return np.array(self.observations[agent])
 
 
@@ -112,20 +112,21 @@ class raw_env(AECEnv):
 
             for i in self.agents:
                 if self.state[self.agents[agent_index]][0] == 0:
-                    self.observations[i][agent_index]+=1
+                    self.observations[i][agent_index] = 1
                 if self.state[self.agents[agent_index]][0] == 1:
-                    self.observations[i][agent_index]-=1
+                    self.observations[i][agent_index]= -1
 
                 if self.state[self.agents[selector_action]][0] == 0:
-                        self.observations[i][selector_action]+= 1
+                        self.observations[i][selector_action] = 1
                 if self.state[self.agents[selector_action]][0] == 1:
-                        self.observations[i][selector_action]-= 1
+                        self.observations[i][selector_action] = -1
 
                 #self.observations[i] = self.state[self.agents[1 - self.agent_name_mapping[i]]]
                 #self.observations[i]['dilemma'] = 1
             #    self.observations[i]['dilemma'] = [0,0,0,1]
 
-            self.rewards[self.agents[agent_index]], self.rewards[self.agents[selector_action]] = self.game.get_payoff()[(self.state[self.agents[agent_index]][0],self.state[self.agents[selector_action]][0])]
+            self.rewards[self.agents[agent_index]] = self.game.get_payoff()[(self.state[self.agents[agent_index]][0],self.state[self.agents[selector_action]][0])][0]
+            print('current state', self.state)
 
             #self.state[self.agents[1 - self.agent_name_mapping[agent]]] = self.game.NONE
 
