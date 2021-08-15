@@ -130,7 +130,7 @@ class raw_env(AECEnv):
             print('game ended peacfully')
             self.rewards[self.agents[0]] = 0# (self.endowment/2)
             self.rewards[self.agents[1]] = 0# (self.endowment/2)
-            self.dones = {agent: True for agent in self.agents}
+            self.dones = {agent: True for agent in self.agents} /ss
 
 
 
