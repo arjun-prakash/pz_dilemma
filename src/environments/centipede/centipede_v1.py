@@ -3,36 +3,35 @@ import numpy as np
 from pettingzoo import AECEnv
 from pettingzoo.utils import agent_selector
 from pettingzoo.utils import wrappers
-import supersuit as ss
 
 
 MOVES = ['DEFECT', 'COOPERATE', 'NONE']
 NUM_ITER = 100
 
-def env():
-    env = raw_env()
+def env(prob=False):
+    env = raw_env(prob=prob)
 
     env = wrappers.CaptureStdoutWrapper(env)
-    #env = ss.flatten_v0(env)
-    #env = ss.dtype_v0(env, np.int8)
     #env = wrappers.AssertOutOfBoundsWrapper(env)
     #env = wrappers.OrderEnforcingWrapper(env)
     return env
 
 
 class raw_env(AECEnv):
-    """Two-player environment for classic prisoners dilemma.
+    """Two-player environment for classic centipede game .
     The observation is simply the last opponent action.
 
-    http://www.ifaamas.org/Proceedings/aamas2021/pdfs/p898.pdf
+    https://www.semanticscholar.org/paper/The-Dynamic-of-Bicycle-Finals%3A-A-Theoretical-and-of-Dilger-Geyer/28ed6c168374bf1866fcdc0f01fa094448a1f009
+    https://www.researchgate.net/publication/283119813_Strategic_Behavior_in_Road_Cycling_Competitions
+    https://www.mdpi.com/2073-4336/11/3/35
     """
 
     metadata = {'render.modes': ['human'], "name": "centipded_v0"}
 
 
-    def __init__(self,n_agents=2, endowment=1):
+    def __init__(self,n_agents=2, endowment=1, prob=False):
 
-        self.pool = 0
+        self.prob = prob
         self.c = 0.1
         self.t = 200
         self.r = 0.5
@@ -42,15 +41,9 @@ class raw_env(AECEnv):
         self.possible_agents = self.agents[:]
         self.agent_name_mapping = dict(zip(self.agents, list(range(self.num_agents))))
 
-        self.action_spaces = {agent: spaces.Discrete(3) for agent in self.agents}
-        self.observation_spaces = {agent: spaces.Discrete(NUM_ITER) for agent in self.agents}
-
-        #self.observation_spaces = {agent: spaces.Dict({'op_action':spaces.Discrete(2), 'num_moves':spaces.Box(low=0, high=NUM_ITER, shape=(1,1), dtype=np.int8)}) for agent in self.agents}
-        #self.observation_spaces = {agent: spaces.Box(low=0, high=NUM_ITER, shape=(2,), dtype=np.int8) for agent in self.agents}
-        #self.observation_spaces = {i:  spaces.MultiDiscrete([3,NUM_ITER]) for i in self.agents}
-
-
-        print('Centipede!')
+        self.action_spaces = {agent: spaces.Discrete(2) for agent in self.agents}
+        self.observation_spaces = {agent: spaces.Discrete(3) for agent in self.agents}
+        print('Centipede!', NUM_ITER)
         print(self.observation_spaces)
         self.state = {agent: 2 for agent in self.agents}
         self.endowment = 1
@@ -65,11 +58,10 @@ class raw_env(AECEnv):
         self._cumulative_rewards = {agent: 0 for agent in self.agents}
         self.dones = {agent: False for agent in self.agents}
         self.infos = {agent: {} for agent in self.agents}
-        self.observation_spaces = {i:  spaces.MultiDiscrete([3,NUM_ITER]) for i in self.agents}
+        self.observations = {agent: 2 for agent in self.agents} #placeholder
         self.state = {agent: 2 for agent in self.agents}
-        self.observations = {agent: np.zeros(100) for agent in self.agents}
 
-        self.endowment = 10
+        self.endowment = 2
         self.num_moves = 0
 
     def render(self, mode="human"):
@@ -80,7 +72,6 @@ class raw_env(AECEnv):
                 print(str_moves)
             print('rewards', self.rewards)
             print("")
-            print(self.observations)
             return self.dones
         except:
             'error'
@@ -101,71 +92,55 @@ class raw_env(AECEnv):
 
     def step(self, action):
         if self.dones[self.agent_selection]:
-            r = self._was_done_step(action)
-            return
+            return self._was_done_step(None)
+
 
 
         agent = self.agent_selection
 
+        if self.prob:
+            if action == 0:
+                action = np.random.choice([0,1], p=[0.01,0.99])
+                #if action == 1: print('flipped')
+
         self.state[agent] = action
 
+        if action == 1:
+            self.rewards[self.agents[0]] = 0
+            self.rewards[self.agents[1]] =  0
 
-        #self.state[agent]['num_moves'] = self.num_moves
+            self.num_moves += 1
+            self.endowment += 2
 
+            self.dones = {agent: self.num_moves >= NUM_ITER for agent in self.agents}
 
+        elif action == 0 and agent == 'player_0': #ORIGINAL IS 0
+            self.rewards[self.agents[0]] = (self.endowment/2) + 1
+            self.rewards[self.agents[1]] = (self.endowment/2) - 1
 
+            self.dones = {agent: True for agent in self.agents}
 
+        elif action == 0 and agent == 'player_1': #ORIGINAL IS 0
+            self.rewards[self.agents[0]] = (self.endowment/2) - 1
+            self.rewards[self.agents[1]] = (self.endowment/2) + 1
 
-        # collect reward if it is the last agent to act
-        if self._agent_selector.is_last():
+            self.dones = {agent: True for agent in self.agents}
 
-            if self.state[self.agents[0]] == 1 and self.state[self.agents[1]] == 1:
-                self.rewards[self.agents[0]] = 1
-                self.rewards[self.agents[1]] =  1
+        if self.num_moves >= NUM_ITER:
+            print('game ended peacfully')
+            self.rewards[self.agents[0]] = 0# (self.endowment/2)
+            self.rewards[self.agents[1]] = 0# (self.endowment/2)
+            self.dones = {agent: True for agent in self.agents}
 
-                self.num_moves += 1
-                self.endowment +=1
-
-                self.dones = {agent: self.num_moves >= NUM_ITER for agent in self.agents}
-
-            elif self.state[self.agents[0]] == 0:
-                self.rewards[self.agents[0]] = self.endowment + 10
-                self.rewards[self.agents[1]] = self.endowment - 10
-
-                self.dones = {agent: True for agent in self.agents}
-
-            elif self.state[self.agents[1]] == 0:
-                self.rewards[self.agents[0]] = self.endowment - 10
-                self.rewards[self.agents[1]] = self.endowment + 10
-
-                self.dones = {agent: True for agent in self.agents}
 
 
             # observe the current state
             for i in self.agents:
-                #self.observations[i] = [self.state[self.agents[1 - self.agent_name_mapping[i]]], self.num_moves]
-                #self.observations[i][1] = self.num_moves
+                self.observations[i] = self.state[self.agents[1 - self.agent_name_mapping[i]]]
 
-                # self.observations[i][0] = np.eye(NUM_ITER)[self.state[self.agents[1 - self.agent_name_mapping[i]]]]
-                # self.observations[i][1] = one_hot_targets = np.eye(NUM_ITER)[self.num_moves]
+        self.state[self.agents[1 - self.agent_name_mapping[agent]]] = 2
 
 
-
-
-
-                tmp = np.zeros(NUM_ITER)
-                tmp = np.insert(tmp, [self.state[self.agents[1 - self.agent_name_mapping[i]]]], self.num_moves)
-                self.observations[i] = tmp
-                print('obs', self.observations[i])
-
-
-
-
-
-        else:
-
-            self.state[self.agents[1 - self.agent_name_mapping[agent]]] = np.zeros(100)
-            self._clear_rewards()
 
 
         self._cumulative_rewards[self.agent_selection] = 0

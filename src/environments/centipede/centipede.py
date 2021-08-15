@@ -20,6 +20,10 @@ def env(prob=False):
 class raw_env(AECEnv):
     """Two-player environment for classic centipede game .
     The observation is simply the last opponent action.
+
+    https://www.semanticscholar.org/paper/The-Dynamic-of-Bicycle-Finals%3A-A-Theoretical-and-of-Dilger-Geyer/28ed6c168374bf1866fcdc0f01fa094448a1f009
+    https://www.researchgate.net/publication/283119813_Strategic_Behavior_in_Road_Cycling_Competitions
+    https://www.mdpi.com/2073-4336/11/3/35
     """
 
     metadata = {'render.modes': ['human'], "name": "centipded_v0"}
@@ -39,7 +43,7 @@ class raw_env(AECEnv):
 
         self.action_spaces = {agent: spaces.Discrete(2) for agent in self.agents}
         self.observation_spaces = {agent: spaces.Discrete(3) for agent in self.agents}
-        print('Centipede!')
+        print('Centipede!', NUM_ITER)
         print(self.observation_spaces)
         self.state = {agent: 2 for agent in self.agents}
         self.endowment = 1
@@ -96,8 +100,8 @@ class raw_env(AECEnv):
 
         if self.prob:
             if action == 0:
-                action = np.random.choice([0,1], p=[0.5,0.5])
-                if action == 1: print('flipped')
+                action = np.random.choice([0,1], p=[0.01,0.99])
+                #if action == 1: print('flipped')
 
         self.state[agent] = action
 
@@ -105,31 +109,33 @@ class raw_env(AECEnv):
 
         # collect reward if it is the last agent to act
         if self._agent_selector.is_last():
+            #print('iter', self.num_moves)
 
             if self.state[self.agents[0]] == 1 and self.state[self.agents[1]] == 1:
                 self.rewards[self.agents[0]] = 0
                 self.rewards[self.agents[1]] =  0
 
                 self.num_moves += 1
-                self.endowment +=1
+                self.endowment += 2
 
                 self.dones = {agent: self.num_moves >= NUM_ITER for agent in self.agents}
 
-            elif self.state[self.agents[0]] == 0:
-                self.rewards[self.agents[0]] = self.endowment + 1
-                self.rewards[self.agents[1]] = self.endowment - 1
+            elif self.state[self.agents[0]] == 0: #ORIGINAL IS 0
+                self.rewards[self.agents[0]] = (self.endowment/2) + 1
+                self.rewards[self.agents[1]] = (self.endowment/2) - 1
 
                 self.dones = {agent: True for agent in self.agents}
 
-            elif self.state[self.agents[1]] == 0:
-                self.rewards[self.agents[0]] = self.endowment - 1
-                self.rewards[self.agents[1]] = self.endowment + 1
+            elif self.state[self.agents[1]] == 0: #original is 1
+                self.rewards[self.agents[0]] = (self.endowment/2) - 1
+                self.rewards[self.agents[1]] = (self.endowment/2) + 1
 
                 self.dones = {agent: True for agent in self.agents}
 
-            elif num_moves >= NUM_ITER:
-                self.rewards[self.agents[0]] = self.endowment
-                self.rewards[self.agents[1]] = self.endowment
+            if self.num_moves >= NUM_ITER:
+                print('game ended peacfully')
+                self.rewards[self.agents[0]] = -1 #(self.endowment/2)
+                self.rewards[self.agents[1]] = -1#  (self.endowment/2)
                 self.dones = {agent: True for agent in self.agents}
 
 
