@@ -24,6 +24,8 @@ class raw_env(AECEnv):
     https://www.semanticscholar.org/paper/The-Dynamic-of-Bicycle-Finals%3A-A-Theoretical-and-of-Dilger-Geyer/28ed6c168374bf1866fcdc0f01fa094448a1f009
     https://www.researchgate.net/publication/283119813_Strategic_Behavior_in_Road_Cycling_Competitions
     https://www.mdpi.com/2073-4336/11/3/35
+
+    https://www.econstor.eu/bitstream/10419/167945/1/834230089.pdf
     """
 
     metadata = {'render.modes': ['human'], "name": "centipded_v0"}

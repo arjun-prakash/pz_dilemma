@@ -6,7 +6,7 @@ from pettingzoo.utils import wrappers
 
 
 MOVES = ['DEFECT', 'COOPERATE', 'NONE']
-NUM_ITER = 100
+NUM_ITER = 50
 
 def env(prob=False):
     env = raw_env(prob=prob)
@@ -116,21 +116,21 @@ class raw_env(AECEnv):
 
         elif action == 0 and agent == 'player_0': #ORIGINAL IS 0
             self.rewards[self.agents[0]] = (self.endowment/2) + 1
-            self.rewards[self.agents[1]] = (self.endowment/2) - 1
+            self.rewards[self.agents[1]] =  (self.endowment/2) - 1
 
             self.dones = {agent: True for agent in self.agents}
 
         elif action == 0 and agent == 'player_1': #ORIGINAL IS 0
-            self.rewards[self.agents[0]] = (self.endowment/2) - 1
+            self.rewards[self.agents[0]] =  (self.endowment/2) - 1
             self.rewards[self.agents[1]] = (self.endowment/2) + 1
 
             self.dones = {agent: True for agent in self.agents}
 
         if self.num_moves >= NUM_ITER:
             print('game ended peacfully')
-            self.rewards[self.agents[0]] = 0# (self.endowment/2)
-            self.rewards[self.agents[1]] = 0# (self.endowment/2)
-            self.dones = {agent: True for agent in self.agents} /ss
+            self.rewards[self.agents[0]] =  (self.endowment/2)
+            self.rewards[self.agents[1]] =  (self.endowment/2)
+            self.dones = {agent: True for agent in self.agents}
 
 
 
