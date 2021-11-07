@@ -3,6 +3,8 @@ pz_dilemma
 
 Game Theory extension for [petting zoo](pettingzoo.ml)
 
+[Blog post on the centipede game](https://medium.com/@arjunprakash_18193/cycling-centipedes-and-multi-agent-reinforcement-learning-5cf3c5d9ebd7)
+
 # Prisoners Dilemma Example
 
 Import
