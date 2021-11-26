@@ -1,7 +1,7 @@
 pz_dilemma
 ==============================
 
-Game Theory extension for [petting zoo](pettingzoo.ml)
+Game Theory extension for [petting zoo](https://www.pettingzoo.ml/third_party_envs)
 
 [Blog post on the centipede game](https://medium.com/@arjunprakash_18193/cycling-centipedes-and-multi-agent-reinforcement-learning-5cf3c5d9ebd7)
 
